@@ -1,11 +1,9 @@
-﻿
-
-Product IceCream = new Product("BaskinRobbins", 5, "qwe");
+﻿Product IceCream = new Product("BaskinRobbins", 5, "qwe");
 Product Coke = new Product("Coke-in-can", 2, "asd");
 Product Coffee = new Product("Coffee-in-can", 1, "zxc");
 
-VendingMachine LobbyVM = new VendingMachine();
-
+VendingMachine LobbyVM = new VendingMachine("lp3bobs10$");
+Console.WriteLine($"");
 LobbyVM.StockItem(IceCream, 20);
 LobbyVM.StockItem(Coke, 10);
 LobbyVM.StockItem(IceCream, 5);
@@ -17,6 +15,7 @@ LobbyVM.StockFLoat(5, 120);
 //LobbyVM.StockFLoat(50, 50);
 //LobbyVM.StockFLoat(100, 50);
 
+
 List<int> money = new List<int>();
 money.Add(10);
 money.Add(5);
@@ -26,12 +25,20 @@ LobbyVM.VendItem("asd", money);
 
 class VendingMachine
 {
-    public int SerialNumber { get; set; } = 1;
-    public Dictionary<int, int> MoneyFloat { get; set; } = new Dictionary<int, int>();
-    public Dictionary<Product, int> Inventory { get; set; } = new Dictionary<Product, int>();
+    public VendingMachine(string barcode)
+    {
+        Barcode = barcode;
+        SerialNumber++;    
+    }
+
+    public string Barcode { get; }
+    public int SerialNumber { get; set; } = 0;
+    private Dictionary<int, int> MoneyFloat { get; set; } = new Dictionary<int, int>();
+    private Dictionary<Product, int> Inventory { get; set; } = new Dictionary<Product, int>();
 
     public string StockItem(Product product, int quantity)
     {
+        //Console.WriteLine($"=-=-=-=-=-=-=-=-=-=-= {this.SerialNumber}");
         int newValue = 0;
         bool productExists = false;
         // check if product is in the inventory
