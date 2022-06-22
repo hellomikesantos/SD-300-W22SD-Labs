@@ -1,4 +1,4 @@
-﻿
+﻿// Lab-3
 
 Product IceCream = new Product(null, 1, null);
 Product Coke = new Product("Coke-in-can", 2, "asd");
