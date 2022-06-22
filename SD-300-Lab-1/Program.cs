@@ -1,5 +1,5 @@
 ﻿
-
+// Lab 1
 Product IceCream = new Product("BaskinRobbins", 5, "qwe");
 Product Coke = new Product("Coke-in-can", 2, "asd");
 Product Coffee = new Product("Coffee-in-can", 1, "zxc");
