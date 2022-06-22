@@ -1,12 +1,12 @@
 ﻿
 
-Product IceCream = new Product("BaskinRobbins", 5, "qwe");
+Product IceCream = new Product(null, 1, null);
 Product Coke = new Product("Coke-in-can", 2, "asd");
 Product Coffee = new Product("Coffee-in-can", 1, "zxc");
 
-VendingMachine LobbyVM = new VendingMachine();
+VendingMachine LobbyVM = new VendingMachine(null);
 
-LobbyVM.StockItem(IceCream, 20);
+LobbyVM.StockItem(IceCream, -20);
 LobbyVM.StockItem(Coke, 10);
 LobbyVM.StockItem(IceCream, 5);
 LobbyVM.StockFLoat(1, 200);
@@ -22,10 +22,28 @@ money.Add(10);
 money.Add(5);
 money.Add(1);
 
-LobbyVM.VendItem("asd", money);
+LobbyVM.VendItem(null, money);
 
 class VendingMachine
 {
+    public VendingMachine(string barcode)
+    {
+        try
+        {
+            if (barcode == null)
+            {
+                throw new ArgumentNullException("ERROR: Null Exception");
+            }
+            Barcode = barcode;
+            SerialNumber++;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public string Barcode { get; }
     public int SerialNumber { get; set; } = 1;
     public Dictionary<int, int> MoneyFloat { get; set; } = new Dictionary<int, int>();
     public Dictionary<Product, int> Inventory { get; set; } = new Dictionary<Product, int>();
@@ -34,18 +52,21 @@ class VendingMachine
     {
         int newValue = 0;
         bool productExists = false;
+
+        try
+        {
+            if(quantity < 0)
+            {
+                throw new Exception("ERROR: Argument value cannot be negative");
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
         // check if product is in the inventory
         foreach(KeyValuePair<Product, int> pair in Inventory)
-        {
-            // update the quantity if the product already exist in the Inventory
-            if(product == pair.Key)
-            {
-                newValue = pair.Value + quantity;
-                Inventory[pair.Key] = newValue;
-                productExists = true;
-                break;
-            } 
-        }
+        
 
         // if the product is not yet in the inventory
         if (!productExists)
@@ -110,6 +131,19 @@ class VendingMachine
 
     public string VendItem(string code, List<int> insertedMoney)
     {
+        try
+        {
+            if (code == null || insertedMoney == null)
+            {
+                throw new Exception("INVALID ARGUMENT: Cannot be null");
+            }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+
         int cashIn = insertedMoney[0];
         
         Console.WriteLine("----------------------------------------------------------------");
@@ -194,9 +228,22 @@ class Product
     public string Code { get; set; }
     public Product(string name, int price, string code)
     {
-        Name = name;
-        Price = price;
-        Code = code;
+        
+        try
+        {
+            if (name == null || price == null || code == null)
+            {
+                throw new ArgumentNullException("ERROR: Null Exception");
+            }
+            Name = name;
+            Price = price;
+            Code = code;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        
     }
 }
 
