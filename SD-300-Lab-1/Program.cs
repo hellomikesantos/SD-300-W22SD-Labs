@@ -1,202 +1,169 @@
-﻿
+﻿// Lab-4
+Hotel briskHotel = new Hotel("Brisk Summer Lodge", "123 Amazing Place Street");
 
-Product IceCream = new Product("BaskinRobbins", 5, "qwe");
-Product Coke = new Product("Coke-in-can", 2, "asd");
-Product Coffee = new Product("Coffee-in-can", 1, "zxc");
+briskHotel.CreateNewRoom("101", 4, "Regular");
+briskHotel.CreateNewRoom("102", 4, "Regular");
+briskHotel.CreateNewRoom("103", 2, "Premium");
 
-VendingMachine LobbyVM = new VendingMachine();
+Client client1 = new Client("Michael", 12345);
+Client client2 = new Client("Oliver", 23433);
+Client client3 = new Client("Rev", 23433);
 
-LobbyVM.StockItem(IceCream, 20);
-LobbyVM.StockItem(Coke, 10);
-LobbyVM.StockItem(IceCream, 5);
-LobbyVM.StockFLoat(1, 200);
-LobbyVM.StockFLoat(1, 150);
-LobbyVM.StockFLoat(5, 120);
-//LobbyVM.StockFLoat(10, 100);
-//LobbyVM.StockFLoat(20, 90);
-//LobbyVM.StockFLoat(50, 50);
-//LobbyVM.StockFLoat(100, 50);
+briskHotel.MakeReservation(client2, "103", 2, new DateTime(2022, 9, 29, 13, 0, 0));
+briskHotel.MakeReservation(client1, "102", 3, new DateTime(2022, 7, 29, 13, 0, 0));
+briskHotel.MakeReservation(client3, "101", 1, new DateTime(2022, 7, 29, 13, 0, 0));
 
-List<int> money = new List<int>();
-money.Add(10);
-money.Add(5);
-money.Add(1);
+briskHotel.CheckAllGuests();
+briskHotel.CheckAllRooms();
 
-LobbyVM.VendItem("asd", money);
 
-class VendingMachine
+class Hotel
 {
-    public int SerialNumber { get; set; } = 1;
-    public Dictionary<int, int> MoneyFloat { get; set; } = new Dictionary<int, int>();
-    public Dictionary<Product, int> Inventory { get; set; } = new Dictionary<Product, int>();
-
-    public string StockItem(Product product, int quantity)
-    {
-        int newValue = 0;
-        bool productExists = false;
-        // check if product is in the inventory
-        foreach(KeyValuePair<Product, int> pair in Inventory)
-        {
-            // update the quantity if the product already exist in the Inventory
-            if(product == pair.Key)
-            {
-                newValue = pair.Value + quantity;
-                Inventory[pair.Key] = newValue;
-                productExists = true;
-                break;
-            } 
-        }
-
-        // if the product is not yet in the inventory
-        if (!productExists)
-        {
-            Inventory.Add(product, quantity);
-            newValue = quantity;
-
-        }
-        Console.WriteLine($"Product: {product.Name}, Code: {product.Code}, Price: {product.Price}, Added Quantity: {quantity}, Total Quantity: {newValue}");
-        return $"{product.Name}, {product.Code}, {product.Price}, {newValue}";
-    }
-
-    public string StockFLoat(int moneyDenomination, int quantity)
-    {
-        bool denominationExists = false;
-        foreach (KeyValuePair<int, int> pair in MoneyFloat)
-        {
-            if (moneyDenomination == pair.Key)
-            {
-                MoneyFloat[pair.Key] = pair.Value + quantity;
-                denominationExists = true;
-            }
-        }
-        if (!denominationExists)
-        {
-            MoneyFloat.Add(moneyDenomination, quantity);
-        }
-
-        Console.WriteLine($"New money: {moneyDenomination} added {quantity} pcs.");
-        foreach(KeyValuePair<int, int> pair in MoneyFloat)
-        {
-            Console.WriteLine($"{pair.Key} has {pair.Value} pcs.");
-        }
-        return $"Great job!";
-    }
-
-    public Dictionary<int, int> GetDenominationOfChange(int totalChange, Dictionary<int, int> moneyFloat)
-    {
-        Dictionary<int, int> change = new Dictionary<int, int>();
-        // list the money denomination change
-        for(int i = moneyFloat.Count - 1; i >= 0; i--)
-        {
-            
-            int integer = moneyFloat.ElementAt(i).Key;
-            int pieces = 0;
-            int subtractor = 0;
-            if(totalChange / integer >= 2)
-            {
-                pieces = totalChange / integer;
-                subtractor -= pieces * integer;
-                Console.WriteLine($"======================{integer}---{pieces}");
-                change.Add(integer, pieces);
-            }
-            else
-            {
-                pieces = totalChange - subtractor;
-                change.Add(integer, pieces);
-            }
-        }   
-        return change;
-    }
-
-    public string VendItem(string code, List<int> insertedMoney)
-    {
-        int cashIn = insertedMoney[0];
-        
-        Console.WriteLine("----------------------------------------------------------------");
-        // get the total amount of cashed in and the denomination
-        for (int i = 0; i < insertedMoney.Count; i++)
-        {
-            // compute total money cashed in
-            if(insertedMoney.Count - 1 == i)
-            {
-                cashIn = cashIn;
-            }
-            else {
-                cashIn +=  insertedMoney[i + 1];
-            }
-            Console.WriteLine($"Successfully inserted {insertedMoney[i]}");
-
-            foreach (KeyValuePair<int, int> money in MoneyFloat)
-            {
-                // update the denomination in MoneyFloat
-                if (insertedMoney[i] == money.Key)
-                {
-                    MoneyFloat[money.Key] += 1;
-                }
-            }
-        }
-        Console.WriteLine($"You've inserted a total of ${cashIn}");
-        int totalChange = 0;
-        foreach (KeyValuePair<Product, int> pair in Inventory)
-        {
-            //Console.WriteLine("sample");
-            // if the product exist in the inventory or in-stock
-            if (pair.Key.Code == code)
-            {
-                Console.WriteLine("================================================");
-                Console.WriteLine($"You have selected {pair.Key.Name}");
-                Console.WriteLine($"Price is ${pair.Key.Price} each");
-
-                // updates the inventory
-                Console.WriteLine($"00000000000000000000 {Inventory[pair.Key] - 1}");
-                Inventory[pair.Key] -= 1;
-                
-                List<int> change = new List<int>();
-                Console.WriteLine($"There are {pair.Value} pc(s) remaining for ");
-                foreach (KeyValuePair<int, int> moneyPair in MoneyFloat)
-                {
-                    // update the money float, vend change
-                    if (cashIn > pair.Key.Price)
-                    {
-                        totalChange = cashIn - pair.Key.Price;
-
-                        for(int i = 0; i < change.Count; i++)
-                        {
-                            if (moneyPair.Key == change[i])
-                            {
-                                MoneyFloat[moneyPair.Key] -= 1;
-                                Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                                Console.WriteLine($"Successful Vend: {moneyPair.Key} has remaining {moneyPair.Value} pc(s)");
-                            }
-                        }
-                    }
-                    else if(cashIn == pair.Key.Price)
-                    {
-                        Console.WriteLine($"Thank you for entering the exact amount");
-                    }
-
-                }
-                
-                
-                Console.WriteLine($"You have received a total of ${totalChange} for your change");
-            }
-        }
-        return "Vend complete";
-    }
-}
-
-
-
-class Product
-{
-    public string Name { get; set; }
-    public int Price { get; set; }
-    public string Code { get; set; }
-    public Product(string name, int price, string code)
+    public static string Name { get; set; }
+    public static string Address { get; set; }
+    public Room Room { get; set; }
+    public Reservation Reservation { get; set; }
+    public List<Room> Rooms { get; set; } = new List<Room>();
+    public List<Client> Clients { get; set; } = new List<Client>();
+    public List<Reservation> Reservations { get; set; } = new List<Reservation>();
+    public Hotel(string name, string address)
     {
         Name = name;
-        Price = price;
-        Code = code;
+        Address = address;
+        Room = new Room("100", 4, "Economy", this);
+        Reservation = Room.Reservation;
+        Room.Hotel = this;
+    }
+    public void CreateNewRoom(string roomNumber, int capacity, string rating)
+    {
+        Room room = new Room(roomNumber, capacity, rating, this);
+        Room = room;
+        Reservation = Room.Reservation;
+        Room.Hotel = this;
+    }
+
+    public void CheckAllRooms()
+    {
+        Console.WriteLine("=========================== Check All Rooms ====================================");
+        Console.WriteLine($"All {Rooms.Count} rooms have the following details:");
+        foreach(Room room in Rooms)
+        {
+            Console.WriteLine($"Room: {room.Number} has {room.Occupants} guests/occupants ----- Rating: {room.Rating}, Number: {room.Number}");
+            //Console.WriteLine($"Rating: {room.Rating}, Number: {room.Number}");
+        }
+    }
+    public void CheckAllGuests()
+    {
+        Console.WriteLine($"There are a total of {Clients.Count} clients in {Name}");
+        Console.WriteLine(Clients.Count);
+        foreach (Client client in Clients)
+        {
+            try
+            {
+                Console.WriteLine("++++++++++++++++++++++++++++++ Check All Guests +++++++++++++++++++++++++++++++++++++++++++");
+                Console.WriteLine($"Guest Name: {client.Name}");
+                Console.WriteLine($"Room No.: {client.Reservation.Room.Number}");
+                Console.WriteLine($"No. of Occupants: {client.Reservation.Occupants}");
+        }
+            catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+    }
+
+    public void MakeReservation(Client client, string roomNumber, int occupants, DateTime date)
+    {
+        // handle reservation
+        foreach (Room r in Rooms) // find the room and check if available and/or capacity available
+        {
+            if (r.Number == roomNumber && !r.Occupied)
+            {
+                Reservation newReserve = new Reservation(r, this);
+                if(newReserve.Room.Capacity >= occupants)
+                {
+                    newReserve.Occupants = occupants;
+                    newReserve.Date = date;
+                    newReserve.IsCurrent = true;
+
+                    newReserve.Client = client;
+                    client.Reservation = newReserve;
+                    client.Hotel = this;
+                    Clients.Add(client);
+                    Reservations.Add(newReserve);
+
+                    newReserve.Room.Occupants = occupants;
+
+
+                    Console.WriteLine("***************************************************");
+                    Console.WriteLine($"Reservation created successfully:");
+                    Console.WriteLine($"Name: {newReserve.Client.Name}");
+                    Console.WriteLine($"Room: {newReserve.Room.Number}");
+                    Console.WriteLine($"No. of Occupants: {newReserve.Occupants}");
+                    Console.WriteLine($"Reservation Date: {newReserve.Date}");
+                    Console.WriteLine("################### END ################");
+                    break;
+                }
+            }
+        }
     }
 }
 
+class Client
+{
+    public Hotel Hotel { get; set; }
+    public Room Room { get; set; }
+    public string Name { get; set; }
+    public long CreditCard { get; set; }
+    public string Membership { get; set; }
+    public List<Reservation> Reservations { get; set; }
+    public Reservation Reservation { get; set; }
+    public Client(string name, long creditCard)
+    {
+        Name = name;
+        CreditCard = creditCard;
+    }
+}
+
+class Reservation
+{
+    public DateTime Date { get; set; } 
+    public int Occupants { get; set; }
+    public bool IsCurrent { get; set; } = false;
+    public Hotel Hotel { get; set; }
+    public Client Client { get; set; }
+    public List<Client> Clients { get; set; }
+    public Room Room { get; set; }
+    
+    public Reservation(Room room, Hotel hotel)
+    {
+        Room = room;
+        Hotel = hotel;
+    }
+}
+
+class Room
+{
+    public Hotel Hotel { get; set; } 
+    public string Number { get; set; }
+    public int Capacity { get; set; }
+    public bool Occupied { get; set; } = false;
+    public string Rating { get; set; }
+    public int Occupants { get; set; }
+    public List<Reservation> Reservations { get; set; }
+    public Reservation Reservation { get; set; }
+    public Room(string number, int capacity, string rating, Hotel hotel)
+    {
+        Number = number;
+        Capacity = capacity;
+        Rating = rating;
+        Hotel = hotel;
+
+        // add room to list of rooms in the hotel, link reservation and clients to hotel
+        Hotel.Rooms.Add(this);
+        Reservation = new Reservation(this, hotel);
+        Reservation.Clients = Hotel.Clients;
+        Reservation.Room = this;
+        Reservation.Hotel = hotel;
+    }
+}
