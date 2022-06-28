@@ -5,9 +5,9 @@ briskHotel.CreateNewRoom("101", 4, "Regular");
 briskHotel.CreateNewRoom("102", 4, "Regular");
 briskHotel.CreateNewRoom("103", 2, "Premium");
 
-Client client1 = new Client("Michael", 12345);
-Client client2 = new Client("Oliver", 23433);
-Client client3 = new Client("Rev", 23433);
+Client client1 = new Client("Michael", 12345, "Regular");
+Client client2 = new Client("Oliver", 23433, "Premium");
+Client client3 = new Client("Rev", 23433, "Regular");
 
 briskHotel.MakeReservation(client2, "103", 2, new DateTime(2022, 9, 29, 13, 0, 0));
 briskHotel.MakeReservation(client1, "102", 3, new DateTime(2022, 7, 29, 13, 0, 0));
@@ -15,8 +15,6 @@ briskHotel.MakeReservation(client3, "101", 1, new DateTime(2022, 7, 29, 13, 0, 0
 
 briskHotel.CheckAllGuests();
 briskHotel.CheckAllRooms();
-
-
 class Hotel
 {
     public static string Name { get; set; }
@@ -34,15 +32,14 @@ class Hotel
         Reservation = Room.Reservation;
         Room.Hotel = this;
     }
-    public void CreateNewRoom(string roomNumber, int capacity, string rating)
+    public void CreateNewRoom(string roomNumber, int capacity, string rating) // instantiates a new room and sets its properties
     {
         Room room = new Room(roomNumber, capacity, rating, this);
         Room = room;
         Reservation = Room.Reservation;
         Room.Hotel = this;
     }
-
-    public void CheckAllRooms()
+    public void CheckAllRooms() // displays all rooms in this hotel and their details: Room number, max occupants, rating
     {
         Console.WriteLine("=========================== Check All Rooms ====================================");
         Console.WriteLine($"All {Rooms.Count} rooms have the following details:");
@@ -52,7 +49,7 @@ class Hotel
             //Console.WriteLine($"Rating: {room.Rating}, Number: {room.Number}");
         }
     }
-    public void CheckAllGuests()
+    public void CheckAllGuests() // displays all guests in this hotel and their details: their checked room, name, membership and how many they are checked-in
     {
         Console.WriteLine($"There are a total of {Clients.Count} clients in {Name}");
         Console.WriteLine(Clients.Count);
@@ -62,22 +59,26 @@ class Hotel
             {
                 Console.WriteLine("++++++++++++++++++++++++++++++ Check All Guests +++++++++++++++++++++++++++++++++++++++++++");
                 Console.WriteLine($"Guest Name: {client.Name}");
+                Console.WriteLine($"Guest Membership: {client.Membership}");
                 Console.WriteLine($"Room No.: {client.Reservation.Room.Number}");
                 Console.WriteLine($"No. of Occupants: {client.Reservation.Occupants}");
-        }
+            }
             catch (Exception ex)
-        {
+            {
             Console.WriteLine(ex.Message);
+            }
         }
     }
-    }
-
-    public void MakeReservation(Client client, string roomNumber, int occupants, DateTime date)
+    /**
+     // MakeReservation() performs the creation of a reservation, in all rooms in this hotel, it creates an instance of a Reservation - a successful reservation is:
+    - correct room number, if a room is not yet occupied and if the room's rating is similar to guest's membership e.g. "Regular", "Premium"
+    **/
+    public void MakeReservation(Client client, string roomNumber, int occupants, DateTime date) 
     {
         // handle reservation
         foreach (Room r in Rooms) // find the room and check if available and/or capacity available
         {
-            if (r.Number == roomNumber && !r.Occupied)
+            if (r.Number == roomNumber && !r.Occupied && r.Rating == client.Membership)
             {
                 Reservation newReserve = new Reservation(r, this);
                 if(newReserve.Room.Capacity >= occupants)
@@ -85,16 +86,12 @@ class Hotel
                     newReserve.Occupants = occupants;
                     newReserve.Date = date;
                     newReserve.IsCurrent = true;
-
                     newReserve.Client = client;
                     client.Reservation = newReserve;
                     client.Hotel = this;
                     Clients.Add(client);
                     Reservations.Add(newReserve);
-
                     newReserve.Room.Occupants = occupants;
-
-
                     Console.WriteLine("***************************************************");
                     Console.WriteLine($"Reservation created successfully:");
                     Console.WriteLine($"Name: {newReserve.Client.Name}");
@@ -118,10 +115,11 @@ class Client
     public string Membership { get; set; }
     public List<Reservation> Reservations { get; set; }
     public Reservation Reservation { get; set; }
-    public Client(string name, long creditCard)
+    public Client(string name, long creditCard, string membership)
     {
         Name = name;
         CreditCard = creditCard;
+        Membership = membership;
     }
 }
 
@@ -158,8 +156,6 @@ class Room
         Capacity = capacity;
         Rating = rating;
         Hotel = hotel;
-
-        // add room to list of rooms in the hotel, link reservation and clients to hotel
         Hotel.Rooms.Add(this);
         Reservation = new Reservation(this, hotel);
         Reservation.Clients = Hotel.Clients;
